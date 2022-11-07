@@ -160,6 +160,14 @@ def main(argv=None):
         action="store_true",
         help="dump generated metadata and exit",
     )
+
+    parser.add_argument(
+        "--script",
+        action='append',
+        help="A list of scripts to be called before building metadata. Useful for injecting pages that are not in code.",
+    )
+    parser
+
     args, argv = parser.parse_known_args(argv)
     if args.noconfig:
         return 1
@@ -269,6 +277,13 @@ def main(argv=None):
                 source_suffixes = [current_config.source_suffix]
 
             current_sourcedir = os.path.join(repopath, sourcedir)
+            # Here we add functionality to modify the source dir before creating a sphinx Project
+            for script in args.script:
+                if not pathlib.Path(script).exists():
+                    return_code = subprocess.run(["python", script, repopath]).returncode
+                else:
+                    continue
+            
             project = sphinx_project.Project(
                 current_sourcedir, source_suffixes
             )

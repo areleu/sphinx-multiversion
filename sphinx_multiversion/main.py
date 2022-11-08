@@ -278,7 +278,11 @@ def main(argv=None):
 
             current_sourcedir = os.path.join(repopath, sourcedir)
             # Here we add functionality to modify the source dir before creating a sphinx Project
-            for script in args.script:
+            if args.script is not None:
+                scripts = args.script
+            else:
+                scripts = []
+            for script in scripts:
                 if not pathlib.Path(script).exists():
                     return_code = subprocess.run(["python", script, repopath]).returncode
                 else:

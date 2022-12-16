@@ -161,13 +161,23 @@ def main(argv=None):
         action="store_true",
         help="dump generated metadata and exit",
     )
-
+    parser.add_argument(
+        "--force-rebuild",
+        action="store_true",
+        help="Ignore existing pages",
+    )
     parser.add_argument(
         "--script",
         action='append',
         help="A list of scripts to be called before building metadata. Useful for injecting pages that are not in code.",
     )
-    parser
+
+    parser.add_argument(
+        "--forced",
+        action="append",
+        help="Force specific page",
+        default=[],
+    )
 
     parser.add_argument(
         "--log-level",
@@ -289,18 +299,24 @@ def main(argv=None):
 
             current_sourcedir = os.path.join(repopath, sourcedir)
             # Here we add functionality to modify the source dir before creating a sphinx Project
-            if args.script is not None:
-                scripts = args.script
+            if (pathlib.Path(os.path.join(
+                    os.path.abspath(args.outputdir), outputdir
+                )).exists()) and not (args.force_rebuild or (gitref.name in args.forced)):
+                logger.warning(f"skipping {gitref.name} scripts - it already exists")
+                continue
             else:
-                scripts = []
-            for script in scripts:
-                repo_script = pathlib.Path(repopath).joinpath(script)
-                if repo_script.exists():
-                    return_code = subprocess.run(["python",  repo_script.as_posix(), repopath]).returncode
-                elif pathlib.Path(script).exists():
-                    return_code = subprocess.run(["python", script, repopath]).returncode
+                if args.script is not None:
+                    scripts = args.script
                 else:
-                    continue
+                    scripts = []
+                for script in scripts:
+                    repo_script = pathlib.Path(repopath).joinpath(script)
+                    if repo_script.exists():
+                        return_code = subprocess.run(["python",  repo_script.as_posix(), repopath]).returncode
+                    elif pathlib.Path(script).exists():
+                        return_code = subprocess.run(["python", script, repopath]).returncode
+                    else:
+                        continue
             
             project = sphinx_project.Project(
                 current_sourcedir, source_suffixes

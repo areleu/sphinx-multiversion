@@ -114,24 +114,25 @@ By default all tags and branches matched by smv_tag_whitelist and smv_branch_whi
 are rebuilt from scratch. This means that CI will take longer as more versions of your
 source are tagged.
 
-The command line option `--only` allows you to list the branch names and tag names that
-you wish to build. Links to all versions in and smv_tag_whitelist smv_branch_whitelist are
-always included in the generated sidebar and these are assumed to have been previously built.
+This can be avoided by adding the following to conf.py
 
-e.g.
+.. code-block:: python
 
-.. code-block:: bash
+    smv_rebuild_tags = False
 
-    sphinx-multiversion docs build/html --only v0.1.0 master
+This causes sphinx multiversion to only build for tags that do not already exist in
+the target folder. Branches are always built because they are subject to change.
 
-Thus if you whitelist master and all released tags you can configure CI to only build
+Links to all versions in smv_tag_whitelist and smv_branch_whitelist are
+always included in the generated sidebar as these have been previously built.
+
+Thus, if you whitelist master and all released tags, this will only build
 the reference in the current commit.
 
 This will result in a set of documentation pages that have links to master and to
 previous releases. There will be no links to future versions in historical documentation
-pages, but this is acceptable.
-
-See :ref:`Github Actions<github-actions>` for example usage.
+pages. This is acceptable because master will always have links to all versions and all
+versions will have a link to master.
 
 
 Overriding Configuration Variables

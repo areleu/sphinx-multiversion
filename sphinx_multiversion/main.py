@@ -67,6 +67,7 @@ def load_sphinx_config_worker(q, confpath, confoverrides, add_defaults):
                 str,
             )
             current_config.add("smv_prefer_remote_refs", False, "html", bool)
+            current_config.add("smv_rebuild_tags", True, "html", bool)
         current_config.pre_init_values()
         current_config.init_values()
     except Exception as err:
@@ -168,13 +169,6 @@ def main(argv=None):
     )
     parser
 
-    parser.add_argument(
-        "--only",
-        type=str,
-        nargs="+",
-        help="only build these versions / branches",
-        metavar="tag/branch",
-    )
     parser.add_argument(
         "--log-level",
         help="Set log level. Options: error, warning, info, debug.",
@@ -347,8 +341,12 @@ def main(argv=None):
         argv.extend(["-D", "smv_metadata_path={}".format(metadata_path)])
         for version_name, data in metadata.items():
 
-            if args.only and version_name not in args.only:
-                logger.warning(f"skipping {version_name} due to --only")
+            if (
+                (not config.smv_rebuild_tags)
+                and data["source"] == "tags"
+                and pathlib.Path(data["outputdir"]).exists()
+            ):
+                logger.warning(f"skipping {version_name} - it already exists")
                 continue
             else:
                 logger.info(f"building {version_name} ...")

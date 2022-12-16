@@ -168,10 +168,24 @@ def main(argv=None):
     )
     parser
 
+    parser.add_argument(
+        "--only",
+        type=str,
+        nargs="+",
+        help="only build these versions / branches",
+        metavar="tag/branch",
+    )
+    parser.add_argument(
+        "--log-level",
+        help="Set log level. Options: error, warning, info, debug.",
+        default="warning",
+    )
     args, argv = parser.parse_known_args(argv)
     if args.noconfig:
         return 1
 
+    numeric_level = getattr(logging, args.log_level.upper(), None)
+    logging.basicConfig(level=numeric_level)
     logger = logging.getLogger(__name__)
 
     sourcedir_absolute = os.path.abspath(args.sourcedir)
@@ -269,6 +283,9 @@ def main(argv=None):
                     gitref.refname,
                 )
                 continue
+            else:
+                logger.info(f"{outputdir} added to sidebar links")
+
             outputdirs.add(outputdir)
 
             # Get List of files
@@ -329,6 +346,13 @@ def main(argv=None):
         # Run Sphinx
         argv.extend(["-D", "smv_metadata_path={}".format(metadata_path)])
         for version_name, data in metadata.items():
+
+            if args.only and version_name not in args.only:
+                logger.warning(f"skipping {version_name} due to --only")
+                continue
+            else:
+                logger.info(f"building {version_name} ...")
+
             os.makedirs(data["outputdir"], exist_ok=True)
 
             defines = itertools.chain(

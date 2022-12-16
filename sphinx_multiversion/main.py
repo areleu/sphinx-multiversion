@@ -283,7 +283,10 @@ def main(argv=None):
             else:
                 scripts = []
             for script in scripts:
-                if pathlib.Path(script).exists():
+                repo_script = pathlib.Path(repopath).joinpath(script)
+                if repo_script.exists():
+                    return_code = subprocess.run(["python",  repo_script.as_posix(), repopath]).returncode
+                elif pathlib.Path(script).exists():
                     return_code = subprocess.run(["python", script, repopath]).returncode
                 else:
                     continue

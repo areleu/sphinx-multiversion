@@ -166,7 +166,6 @@ def main(argv=None):
         action='append',
         help="A list of scripts to be called before building metadata. Useful for injecting pages that are not in code.",
     )
-    parser
 
     parser.add_argument(
         "--only",
@@ -295,18 +294,21 @@ def main(argv=None):
 
             current_sourcedir = os.path.join(repopath, sourcedir)
             # Here we add functionality to modify the source dir before creating a sphinx Project
-            if args.script is not None:
-                scripts = args.script
+            if args.only and gitref.name not in args.only:
+                logger.warning(f"skipping {gitref.name} due to --only")
             else:
-                scripts = []
-            for script in scripts:
-                repo_script = pathlib.Path(repopath).joinpath(script)
-                if repo_script.exists():
-                    return_code = subprocess.run(["python",  repo_script.as_posix(), repopath]).returncode
-                elif pathlib.Path(script).exists():
-                    return_code = subprocess.run(["python", script, repopath]).returncode
+                if args.script is not None:
+                    scripts = args.script
                 else:
-                    continue
+                    scripts = []
+                for script in scripts:
+                    repo_script = pathlib.Path(repopath).joinpath(script)
+                    if repo_script.exists():
+                        return_code = subprocess.run(["python",  repo_script.as_posix(), repopath]).returncode
+                    elif pathlib.Path(script).exists():
+                        return_code = subprocess.run(["python", script, repopath]).returncode
+                    else:
+                        continue
             
             project = sphinx_project.Project(
                 current_sourcedir, source_suffixes

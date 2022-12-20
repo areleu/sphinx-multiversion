@@ -303,7 +303,6 @@ def main(argv=None):
                     os.path.abspath(args.outputdir), outputdir
                 )).exists()) and not (args.force_rebuild or (gitref.name in args.forced)):
                 logger.warning(f"skipping {gitref.name} scripts - it already exists")
-                continue
             else:
                 if args.script is not None:
                     scripts = args.script
@@ -315,8 +314,6 @@ def main(argv=None):
                         return_code = subprocess.run(["python",  repo_script.as_posix(), repopath]).returncode
                     elif pathlib.Path(script).exists():
                         return_code = subprocess.run(["python", script, repopath]).returncode
-                    else:
-                        continue
             
             project = sphinx_project.Project(
                 current_sourcedir, source_suffixes

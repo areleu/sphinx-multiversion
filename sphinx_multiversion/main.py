@@ -354,11 +354,12 @@ def main(argv=None):
         argv.extend(["-D", "smv_metadata_path={}".format(metadata_path)])
         for version_name, data in metadata.items():
 
-            if (
-                (not config.smv_rebuild_tags)
-                and data["source"] == "tags"
-                and pathlib.Path(data["outputdir"]).exists()
-            ):
+            # if (
+            #     (not config.smv_rebuild_tags)
+            #     and data["source"] == "tags"
+            #     and pathlib.Path(data["outputdir"]).exists()
+            # ):
+            if (pathlib.Path(data["outputdir"]).exists()) and not (args.force_rebuild or (gitref.name in args.forced)):
                 logger.warning(f"skipping {version_name} - it already exists")
                 continue
             else:

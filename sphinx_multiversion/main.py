@@ -359,7 +359,7 @@ def main(argv=None):
             #     and data["source"] == "tags"
             #     and pathlib.Path(data["outputdir"]).exists()
             # ):
-            if (pathlib.Path(data["outputdir"]).exists()) and not (args.force_rebuild or (gitref.name in args.forced)):
+            if (pathlib.Path(data["outputdir"]).exists()) and not (args.force_rebuild or (version_name in args.forced)):
                 logger.warning(f"skipping {version_name} - it already exists")
                 continue
             else:
